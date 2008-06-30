@@ -1,0 +1,51 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+  <head>
+    <title></title>
+  </head>
+  <body>
+        <p><a href="new.html">new</a></p>
+
+    <h1><a href="home.html">CouchDB PDX</a></h1>
+    <ul id="posts">
+    </ul>
+    <script src="/_utils/script/json2.js"></script>
+	  <script src="/_utils/script/jquery.js"></script>
+	  <script src="/_utils/script/jquery.cookies.js"></script>
+	  <script src="/_utils/script/jquery.couch.js"></script>
+	  <script>
+    function prettyDate(time){
+      var date = new Date(time),
+      diff = (((new Date()).getTime() - date.getTime()) / 1000),
+      day_diff = Math.floor(diff / 86400);
+
+      // if ( isNaN(day_diff) || day_diff < 0 || day_diff >= 31 ) return;
+
+        return day_diff < 1 && (
+          diff < 60 && "just now" ||
+          diff < 120 && "1 minute ago" ||
+          diff < 3600 && Math.floor( diff / 60 ) + " minutes ago" ||
+          diff < 7200 && "1 hour ago" ||
+          diff < 86400 && Math.floor( diff / 3600 ) + " hours ago"
+        ) ||
+        day_diff == 1 && "yesterday" ||
+        day_diff < 7 && day_diff + " days ago" ||
+        day_diff < 31 && Math.ceil( day_diff / 7 ) + " weeks ago" ||
+        day_diff < 730 && Math.ceil( day_diff / 31 ) + " months ago" ||
+        Math.ceil( day_diff / 365 ) + " years ago";
+      }
+      
+ 
+      var db = $.couch.db("pdxblog");
+      db.view("posts/posts-map", {
+        descending: true,
+        success : function(json){
+          json.rows.forEach(function(row){
+            var post = row.value;
+            $("#posts").append('<li><h2><a href="show.html?post_id='+  encodeURIComponent(post._id)+'">'+post.title+'</a></h2><p>'+post.author+'</p>'+'<p>'+ prettyDate(new Date(post.published_at))+'</p>'+post.body+'</li>')
+          })
+        }
+      });
+	  </script>
+  </body>
+</html>
