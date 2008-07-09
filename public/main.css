@@ -1,0 +1,23 @@
+h1 {color: red;}
+
+input {
+	width: 400px;
+}
+
+textarea {
+	width: 400px;
+	height: 200px;
+}
+
+label {
+	font-weight: bold;
+	width: 100px;
+	float:left;
+	text-align:right;
+	margin-right: 10px;
+}
+
+input.submit {
+	width: 100px;
+}
+
