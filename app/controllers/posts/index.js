@@ -5,8 +5,9 @@ function(params, db){
 
 	// get all the posts
 	var doc = db.view("posts/posts-map");
+
 	
-	doc.rows.forEach(function(row){
+	doc.rows.reverse().forEach(function(row){
   	var post = row.value;
     body += '<li><h2>'+post.title+'</h2>'
 		body += '<p>by '+post.author+'</p>'
