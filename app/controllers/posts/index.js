@@ -14,10 +14,10 @@ function(params, db){
   	var post = row.value;
     body += '<li><h2>'+post.title+'</h2>'
 		body += '<p>by '+post.author+'</p>'
+		body += '<p class="permalink"><a href="show?_id='+post._id+'">'+post.published_at.split(' ')[0] + ' at ' +  post.published_at.split(' ')[1]+'</a></p>'
 		body += post.body
 		body += '</li>'
 	});
-	// published_at not included
      
 	body += '</ul></body></html>'
 	
