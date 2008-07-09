@@ -23,7 +23,7 @@ namespace :autosave do
   task :start => :read_config do
     raise "Can't start autosave without valid db in config.json" unless @config["db"]
     @pid = fork do
-      exec "/usr/bin/ruby vendor/autosave.rb public #{@config["db"]}"
+      exec "/usr/bin/ruby vendor/autosave.rb -p public -d #{@config["db"]}"
     end
     File.open("log/autosave.pid", "w"){|f| f << @pid}
   end
