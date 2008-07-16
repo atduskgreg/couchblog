@@ -80,8 +80,6 @@ function(params, db) {
 
 	postOnly(params);
 	
-
-	
 	var user = db.open('user:'+params.post.login);
 	
 	if (user && authenticatedUser(user, params)) {
