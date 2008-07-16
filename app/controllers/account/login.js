@@ -2,7 +2,11 @@ function(params, db) {
   //include-lib
 
 	function currentUser(params) {
-		var session = sessionFromCookie(params.cookie);
+		if(params.cookie.session){
+			return sessionFromCookie(params.cookie).login;
+		} else {
+			return false
+		}
 	}
 
 	function sessionFromCookie(encodedCookies){
@@ -13,12 +17,29 @@ function(params, db) {
 		return 'session=' + encodeURIComponent(JSON.stringify(session)) + "; path=/;"; // expires, etc.
 	}
 	
-	function authenticateSession(session, params){
-		if (params.post && params.post.login && (session.hashedLogin == secretVersionOf(params.post.login))){
+	function signableSession(session){
+		var result = {}
+		for (key in session){ 
+			if(key != "signature"){ 
+				result[key] = session[key]				
+			} 
+		} 
+		return result;
+	}
+	
+	function signSession(session){
+		log("to be signed");
+		log(signableSession(session));
+		session.signature = secretVersionOf(JSON.stringify(signableSession(session)));
+		return session;
+	}
+	
+	function authenticateSession(session){
+		if ( session.signature && (secretVersionOf(JSON.stringify(signableSession(session))) == session.signature)) {
 			return true
 		} else {
 			throw({message: 'Forbidden: Session couldn\'t be authenticated.', status : 403})
-		};
+		}
 	};
 	
 	function authenticatedUser(user, params){
@@ -42,8 +63,7 @@ function(params, db) {
 			response[this.type] = this.body;
 			
 			if (this.session) {
-				authenticateSession(this.session, params);
-				response.headers['Set-Cookie'] = cookieFromSession(this.session)
+				response.headers['Set-Cookie'] = cookieFromSession(signSession(this.session));
 			}
 			
 			if (this.redirect) {
@@ -59,6 +79,7 @@ function(params, db) {
 	log(params);
 
 	postOnly(params);
+	
 
 	
 	var user = db.open('user:'+params.post.login);

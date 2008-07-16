@@ -1,4 +1,5 @@
 function(params, db){
+	//include-lib
 
 	function currentUser(params) {
 		if(params.cookie.session){
@@ -11,7 +12,76 @@ function(params, db){
 	function sessionFromCookie(encodedCookies){
 		return JSON.parse(decodeURIComponent(encodedCookies.session));
 	};
-
+	
+	function cookieFromSession(session){
+		return 'session=' + encodeURIComponent(JSON.stringify(session)) + "; path=/;"; // expires, etc.
+	}
+	
+	function signableSession(session){
+		var result = {}
+		for (key in session){ 
+			if(key != "signature"){ 
+				result[key] = session[key]
+			} 
+		} 
+		return result;
+	}
+	
+	function signSession(session){
+		log("to be signed");
+		log(session)
+		session.signature = secretVersionOf(JSON.stringify(signableSession(session)));
+		return session;
+	}
+	
+	function authenticateSession(session){
+		log("to be authenticated");
+		log(session)
+		if ( session.signature && (secretVersionOf(JSON.stringify(signableSession(session))) == session.signature)) {
+			log("session is authentic");
+			return true
+		} else {
+			throw({message: 'Forbidden: Session couldn\'t be authenticated.', status : 403})
+		}
+	};
+	
+	function authenticatedUser(user, params){
+		return secretVersionOf(params.post.password) == user.hashedPassword;
+	}
+	
+	function postOnly(params){
+		if (params.verb != 'POST') {
+			throw({message: 'Method not allowed: POST only.', status : 405})
+		}
+	}
+	
+	// TODO: -alerts on response?
+	function Response(body){
+		this.type = 'body';
+		this.body = body;
+		
+		this.finalize = function() {
+			
+			var response = {headers : {}};
+			response[this.type] = this.body;
+			
+			if (this.session) {
+				response.headers['Set-Cookie'] = cookieFromSession(signSession(this.session));
+			}
+			
+			if (this.redirect) {
+				response.status = 302;
+				response.headers['Location'] = this.redirect;
+			}
+			 
+			return response;
+		}
+	};
+	var response = new Response;
+	
+	log(params)
+	
+	if(params.cookie.session) authenticateSession(sessionFromCookie(params.cookie));
 	var currentUser = currentUser(params);
 	
 	var body = '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"><html>';
@@ -53,5 +123,8 @@ function(params, db){
      
 	body += '</ul></body></html>'
 	
-	return {'body': body, 'headers': {}};
+	response = new Response(body)
+	return response.finalize();
+	
+	
 }
