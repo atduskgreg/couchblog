@@ -2,6 +2,7 @@ require 'rubygems'
 require 'couchrest'
 require 'json'
 require 'digest/md5'
+require 'yaml'
 
 todo = ARGV
 todo = ["views", "public", "controllers"] if ARGV.include? "all"
@@ -12,27 +13,37 @@ DBNAME = JSON.load( open("#{PROJECT_ROOT}/config.json").read )["db"]
 
 LANGS = {"rb" => "ruby", "js" => "javascript"}
 
+ROOT_PATH = File.expand_path(File.dirname("."))
+
 # parse the file structure to load the public files, controllers, and views into a hash with the right shape for coucdb
 couch = {}
 
-couch["public"] = Dir["#{File.expand_path(File.dirname("."))}/public/**/*.*"].collect do |f|
+couch["public"] = Dir["#{ROOT_PATH}/public/**/*.*"].collect do |f|
   {f.split("public/").last => open(f).read}
 end
 
 couch["controllers"] = {}
-Dir["#{File.expand_path(File.dirname("."))}/app/controllers/**/*.*"].collect do |c|
+Dir["#{ROOT_PATH}/app/controllers/**/*.*"].collect do |c|
   path_parts = c.split("/")
   
   controller_name = path_parts[path_parts.length - 2]
   action_name = path_parts[path_parts.length - 1].split(".").first
 
   couch["controllers"][controller_name] ||= {"actions" => {}}
-  couch["controllers"][controller_name]["actions"][action_name] = open(c).read
-  
+  couch["controllers"][controller_name]["actions"][action_name] = open(c).read  
+end
+
+# apply libs
+Dir["#{ROOT_PATH}/app/controllers/*-lib.*"].each do |libfile|
+  controller_name = /app\/controllers\/(\w+)-lib/.match(libfile)[1]
+  lib = open(libfile).read
+  couch["controllers"][controller_name]["actions"].each do |name, action|
+    action.sub!(/\/\/include-lib/,lib) if lib
+  end
 end
 
 couch["designs"] = {}
-Dir["#{File.expand_path(File.dirname("."))}/app/views/**/*.*"].collect do |design_doc|
+Dir["#{ROOT_PATH}/app/views/**/*.*"].collect do |design_doc|
   design_doc_parts = design_doc.split('/')
   pre_normalized_view_name = design_doc_parts.last.split("-")
   view_name = pre_normalized_view_name[0..pre_normalized_view_name.length-2].join("-")
@@ -64,8 +75,6 @@ couch["designs"].each do |name, props|
   props["views"].delete("#{name}-reduce") unless props["views"]["#{name}-reduce"].keys.include?("reduce")
 end
 
-# puts couch.to_yaml
-
 # parsing done, begin posting
 
 # connect to couchdb
@@ -83,9 +92,9 @@ def create_or_update(id, fields)
   end
   
   if existing == updated
-    puts "no change to #{id}. skipping..."
+    puts "skipping #{id}"
   else
-    puts "replacing #{id}"
+    puts "REPLACING #{id}"
     save(updated)
   end
 
@@ -114,7 +123,7 @@ end
 
 
 if todo.include? "views"
-  puts "posting views into CouchDB"
+  puts "posting views into CouchDB #{DBNAME}"
   couch["designs"].each do |k,v|
     create_or_update("_design/#{k}", v)
   end
@@ -122,7 +131,7 @@ if todo.include? "views"
 end
 
 if todo.include? "controllers"
-  puts "posting controllers into CouchDB"
+  puts "posting controllers into CouchDB #{DBNAME}"
   couch["controllers"].each do |k,v|
     create_or_update("controller/#{k}", v)
   end
@@ -131,7 +140,7 @@ end
 
 
 if todo.include? "public"
-  puts "posting public docs into CouchDB"
+  puts "posting public docs into CouchDB #{DBNAME}"
 
   if couch["public"].empty?
     puts "no docs in public"; exit 
@@ -167,9 +176,19 @@ if todo.include? "public"
     @db.save({"_id" => "public", "_attachments" => @attachments, "signatures" => @signatures})
     exit
   end
-        
+  
+  # remove deleted docs
+  to_be_removed = doc["signatures"].keys.select{|d| !couch["public"].collect{|p| p.keys.first}.include?(d) }
+  
+  to_be_removed.each do |p|
+    puts "deleting #{p}"
+    doc["signatures"].delete(p)
+    doc["_attachments"].delete(p)
+  end
+  
+  # update existing docs:
   doc["signatures"].each do |path, sig|
-    if (@signatures[path] == sig) && doc["signatures"].keys.include?(path)
+    if (@signatures[path] == sig)
       puts "no change to #{path}. skipping..."
     else
       puts "replacing #{path}"
@@ -178,12 +197,29 @@ if todo.include? "public"
       doc["_attachments"][path].delete("length")    
       doc["_attachments"][path]["data"] = @attachments[path]["data"]
       doc["_attachments"][path].merge!({"data" => @attachments[path]["data"]} )
-      begin
-        @db.save(doc)
-      rescue Exception => e
-        puts e.message
-      end
+      
     end
+  end
+  
+  # add in new files
+  new_files = couch["public"].select{|d| !doc["signatures"].keys.include?( d.keys.first) } 
+  
+  new_files.each do |f|
+    puts "creating #{f}"
+    path = f.keys.first
+    content = f.values.first
+    doc["signatures"][path] = md5(content)
+    
+    doc["_attachments"][path] = {
+      "data" => content,
+      "content_type" => @content_types[path.split('.').last]
+    }
+  end
+  
+  begin
+    @db.save(doc)
+  rescue Exception => e
+    puts e.message
   end
   
   puts
