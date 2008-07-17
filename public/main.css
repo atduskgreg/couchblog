@@ -11,13 +11,46 @@ textarea {
 
 label {
 	font-weight: bold;
-	width: 100px;
 	float:left;
-	text-align:right;
+	text-align: right;
 	margin-right: 10px;
 }
 
 input.submit {
 	width: 100px;
 }
+
+#login p {
+	float:left;
+	margin: 2px;
+}
+
+#login input {
+	width: 100px;
+	font-size: 10px;
+	margin-right: 10px;
+	height: 12px;
+}
+
+#login {
+	display:none;
+	float:left;
+	background-color: #eee;
+	padding: 3px;
+}
+
+#nav {
+	float:left;
+	margin:0;
+	margin-top: 5px;
+	padding:0;
+}
+
+#nav li{
+	list-style-type: none;
+	display:inline;
+	margin-right: 10px;
+}
+
+
 

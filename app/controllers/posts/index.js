@@ -1,83 +1,5 @@
 function(params, db){
 	//include-lib
-
-	function currentUser(params) {
-		if(params.cookie.session){
-			return sessionFromCookie(params.cookie).login;
-		} else {
-			return false
-		}
-	}
-
-	function sessionFromCookie(encodedCookies){
-		return JSON.parse(decodeURIComponent(encodedCookies.session));
-	};
-	
-	function cookieFromSession(session){
-		return 'session=' + encodeURIComponent(JSON.stringify(session)) + "; path=/;"; // expires, etc.
-	}
-	
-	function signableSession(session){
-		var result = {}
-		for (key in session){ 
-			if(key != "signature"){ 
-				result[key] = session[key]
-			} 
-		} 
-		return result;
-	}
-	
-	function signSession(session){
-		log("to be signed");
-		log(session)
-		session.signature = secretVersionOf(JSON.stringify(signableSession(session)));
-		return session;
-	}
-	
-	function authenticateSession(session){
-		log("to be authenticated");
-		log(session)
-		if ( session.signature && (secretVersionOf(JSON.stringify(signableSession(session))) == session.signature)) {
-			log("session is authentic");
-			return true
-		} else {
-			throw({message: 'Forbidden: Session couldn\'t be authenticated.', status : 403})
-		}
-	};
-	
-	function authenticatedUser(user, params){
-		return secretVersionOf(params.post.password) == user.hashedPassword;
-	}
-	
-	function postOnly(params){
-		if (params.verb != 'POST') {
-			throw({message: 'Method not allowed: POST only.', status : 405})
-		}
-	}
-	
-	// TODO: -alerts on response?
-	function Response(body){
-		this.type = 'body';
-		this.body = body;
-		
-		this.finalize = function() {
-			
-			var response = {headers : {}};
-			response[this.type] = this.body;
-			
-			if (this.session) {
-				response.headers['Set-Cookie'] = cookieFromSession(signSession(this.session));
-			}
-			
-			if (this.redirect) {
-				response.status = 302;
-				response.headers['Location'] = this.redirect;
-			}
-			 
-			return response;
-		}
-	};
-	var response = new Response;
 	
 	log(params)
 	
@@ -87,13 +9,16 @@ function(params, db){
 	var body = '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"><html>';
 	body += '<head><title>CouchDB PDX</title>';
 	body += '<script src="/_utils/script/jquery.js"></script>';
+	body += '<script src="/pdxblog/public/main.js"></script>';
+
 	body += '<link rel="stylesheet" type="text/css" charset="utf-8" href="/pdxblog/public/main.css" /></head><body>';
-	body += '<a href="index">index</a> | <a href="new">new</a>';
+	body += '<ul id="nav"><li><a href="index">index</a></li><li><a href="new">new</a></li>';
 	              
 	if (currentUser){
-		body += ' | logged in as: ' + currentUser;
+		body += '<li>logged in as: ' + currentUser + '<li>';
+		body += '<li><a href="/pdxblog/_action/account/logout">logout</a></li></ul> <br /> ';
 	} else {
-		body += '<form action="/pdxblog/_action/account/login" method="post">                                   ';
+		body += '<li><a href="/pdxblog/_action/account/login" id="login-link">login</a></li></ul><form id="login" action="/pdxblog/_action/account/login" method="post">                                   ';
   	body += '  <p><label>Username</label>                                                                   ';
   	body += '  <input name="login"></input></p>                                                             ';
   	body += '                                                                                               ';
@@ -102,8 +27,8 @@ function(params, db){
   	body += '  <p>                                                                                          ';
   	body += '  <label class="submit">&nbsp;</label><input class="submit" type="submit" value="submit" />    ';
   	body += '  </p>                                                                                         ';
-  	body += '</form>                                                                                        ';
-	}                                                                                         
+  	body += '</form> <br />                                                                                       ';
+	}                                                              
 
 	                                                                                                        
 	body += '<h1>CouchDB Blog</h1>'	;

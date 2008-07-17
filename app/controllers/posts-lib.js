@@ -209,6 +209,107 @@ function secretVersionOf(string){
 	return b64_hmac_sha1(SUPERSECRET, string);
 }
 
-function validCookie(cookie){
-	return secretVersionOf(cookie.login) == cookie.secret;
+function currentUser(params) {
+	if(params.cookie.session){
+		return sessionFromCookie(params.cookie).login;
+	} else {
+		return false
+	}
+};
+
+function sessionFromCookie(encodedCookies){
+	return JSON.parse(decodeURIComponent(encodedCookies.session));
+};
+	
+function cookieFromSession(session, expiration, path){
+	log("building cookie");
+	log(session);
+	var cookieValue = 'session=' + encodeURIComponent(JSON.stringify(session));
+	if(expiration){
+		cookieValue += "; expires=" + expiration;
+	};
+	
+	if(path){
+		cookieValue += "; path="+path +";";
+	} else {
+		cookieValue += "; path=/;";
+	};
+	
+	log(cookieValue);
+	
+	return cookieValue;
 }
+
+function signableSession(session){
+	var result = {}
+	for (key in session){ 
+		if(key != "signature"){ 
+			result[key] = session[key]
+		} 
+	} 
+	return result;
+};
+
+function signSession(session){
+	log("to be signed");
+	log(session);
+	session.signature = secretVersionOf(JSON.stringify(signableSession(session)));
+	return session;
+};
+
+function authenticateSession(session){
+	log("to be authenticated");
+	log(session);
+	if ( session.signature && (secretVersionOf(JSON.stringify(signableSession(session))) == session.signature)) {
+		log("session is authentic");
+		return true;
+	} else {
+		throw({message: "Forbidden: Session couldn't be authenticated.", status: 403});
+	};
+};
+
+function authenticatedUser(user, params){
+	return secretVersionOf(params.post.password) == user.hashedPassword;
+}
+
+function postOnly(params){
+	if (params.verb != 'POST') {
+		throw({message: 'Method not allowed: POST only.', status : 405})
+	}
+}
+
+function loggedInOnly(params){
+	if (!currentUser(params)) {
+		throw({message: 'Forbidden: Logged in users only.', status : 403})
+	}
+}
+	
+// TODO: -alerts on response?
+function Response(body){
+	this.type = 'body';
+	this.body = body;
+	if(params.cookie) this.session = sessionFromCookie(params.cookie);
+	
+	this.expireSession = function(){
+		this.session.expires = "Thu, 01 Jan 1970 00:00:00 GMT";
+	}
+	
+	this.finalize = function() {
+		
+		var response = {headers : {}};
+		response[this.type] = this.body;
+		
+		if (this.session) {
+			var exp = this.session.expires;
+			delete(this.session.expires); // this makes finalize destructive!
+			response.headers['Set-Cookie'] = cookieFromSession(signSession(this.session), exp);
+		}
+		
+		if (this.redirect) {
+			response.status = 302;
+			response.headers['Location'] = this.redirect;
+		}
+		 
+		return response;
+	}
+};
