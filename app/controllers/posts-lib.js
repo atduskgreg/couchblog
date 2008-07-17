@@ -288,7 +288,7 @@ function loggedInOnly(request){
 function Response(body){
 	this.type = 'body';
 	this.body = body;
-	// response should not talk directly to the request:
+	// response should not talk directly to the request?:
 	if(request.cookie) this.session = sessionFromCookie(request.cookie);
 	
 	this.expireSession = function(){
