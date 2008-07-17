@@ -1,8 +1,8 @@
-function(params, db) {
+function(request, db) {
   //include-lib
 	
-	// postOnly(params);
-	if(params.cookie.session) authenticateSession(sessionFromCookie(params.cookie));
+	// postOnly(request);
+	if(request.cookie.session) authenticateSession(sessionFromCookie(request.cookie));
 		
 	var response = new Response;
 	

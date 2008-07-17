@@ -1,5 +1,18 @@
 function(request, db){
+	//include-lib
+	
 	log(request)
+
+	try {
+		loggedInOnly(request);
+	} catch(e){
+		var response = new Response(e.message);
+		response.redirect = "/pdxblog/_action/posts/index";
+		return response.finalize();
+	}
+
+	if(request.cookie.session) authenticateSession(sessionFromCookie(request.cookie));
+	var currentUser = currentUser(request);
 
 	if (request.verb == "POST"){
 		var doc = request.post;
@@ -18,17 +31,24 @@ function(request, db){
 		doc.published_at = now;
 		doc._id = d.getUTCFullYear() + '' + f(d.getUTCMonth() + 1) + '' + f(d.getUTCDate()) + '' + '-' + doc.title.replace(/[^\w\s-]+/g, '').replace(/[-\s]+/g, '-').toLowerCase() ;
 		
-		db.save(doc);
-	}
+		try{
+			db.save(doc);
+		} catch(e){
+			var response = new Response;
+			response.body = 'There is already a post by that name. Click <a href="/pdxblog/_action/posts/index">here</a> if you are not redirected.';
+
+			response.redirect = '/pdxblog/_action/posts/new'
+			return response.finalize();
+		}
+	};
 	
-	var body = '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"><html><head><title></title></head><body>'	
-	body += '<link rel="stylesheet" type="text/css" charset="utf-8" href="/pdxblog/_action/pdxblog/public/main.css" /></head><body>';
-	body += '<a href="index">index</a> | <a href="new">new</a> | <a href="/pdxblog/_action/account/login">login</a>';
 
-	body += '<h1>CouchDB Blog</h1>'	
-	body += '<p>post was successfully created:<a href="show?_id='+ doc._id +'">view it here</a>.</p>'
-	body += '</body></html>'
+	var response = new Response;
 
-	return {'body' : body}
+	response.body = 'Post was created. Click <a href="/pdxblog/_action/posts/show?_id='+ doc._id +'">here</a> if you are not redirected.';
+	response.redirect = '/pdxblog/_action/posts/show?_id='+ doc._id;
+		
+	return response.finalize();
+	
 	
 }

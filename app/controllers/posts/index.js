@@ -1,10 +1,10 @@
-function(params, db){
+function(request, db){
 	//include-lib
 	
-	log(params)
+	log(request)
 	
-	if(params.cookie.session) authenticateSession(sessionFromCookie(params.cookie));
-	var currentUser = currentUser(params);
+	if(request.cookie.session) authenticateSession(sessionFromCookie(request.cookie));
+	var currentUser = currentUser(request);
 	
 	var body = '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"><html>';
 	body += '<head><title>CouchDB PDX</title>';
@@ -12,10 +12,11 @@ function(params, db){
 	body += '<script src="/pdxblog/public/main.js"></script>';
 
 	body += '<link rel="stylesheet" type="text/css" charset="utf-8" href="/pdxblog/public/main.css" /></head><body>';
-	body += '<ul id="nav"><li><a href="index">index</a></li><li><a href="new">new</a></li>';
+	body += '<ul id="nav"><li><a href="index">index</a></li>';
 	              
 	if (currentUser){
 		body += '<li>logged in as: ' + currentUser + '<li>';
+		body += '<li><a href="new">new</a></li>';
 		body += '<li><a href="/pdxblog/_action/account/logout">logout</a></li></ul> <br /> ';
 	} else {
 		body += '<li><a href="/pdxblog/_action/account/login" id="login-link">login</a></li></ul><form id="login" action="/pdxblog/_action/account/login" method="post">                                   ';

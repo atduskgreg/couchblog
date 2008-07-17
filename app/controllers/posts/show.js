@@ -1,8 +1,8 @@
-function(params, db){
+function(request, db){
 	//include-lib
-	
-	
-	var currentUser = currentUser(params);
+
+	if(request.cookie.session) authenticateSession(sessionFromCookie(request.cookie));
+	var currentUser = currentUser(request);
 
 	var body = '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"><html>';
 	body += '<head><title>CouchDB PDX</title>';
@@ -10,11 +10,12 @@ function(params, db){
 	body += '<script src="/pdxblog/public/main.js"></script>';
 
 	body += '<link rel="stylesheet" type="text/css" charset="utf-8" href="/pdxblog/public/main.css" /></head><body>';
-	body += '<ul id="nav"><li><a href="index">index</a></li><li><a href="new">new</a></li>';
+	body += '<ul id="nav"><li><a href="index">index</a></li>';
 	              
 	if (currentUser){
 		body += '<li>logged in as: ' + currentUser + '<li>';
-		body += '<li><a href="/pdxblog/_action/account/logout">logout</a></li></ul>';
+		body += '<li><a href="new">new</a></li>';
+		body += '<li><a href="/pdxblog/_action/account/logout">logout</a></li></ul> <br /> ';
 	} else {
 		body += '<li><a href="/pdxblog/_action/account/login" id="login-link">login</a></li></ul><form id="login" action="/pdxblog/_action/account/login" method="post">                                   ';
   	body += '  <p><label>Username</label>                                                                   ';
@@ -26,11 +27,12 @@ function(params, db){
   	body += '  <label class="submit">&nbsp;</label><input class="submit" type="submit" value="submit" />    ';
   	body += '  </p>                                                                                         ';
   	body += '</form> <br />                                                                                       ';
-	}                                 
+	}                                                              
+                           
 	                                                                                                        
 	body += '<h1>CouchDB Blog</h1>'	;
 	
-	var post = db.open(params.query["_id"]);
+	var post = db.open(request.query["_id"]);
 	
 	body += '<h2>'+post.title+'</h2>'
 	body += '<p>by '+post.author+'</p>'
@@ -38,7 +40,5 @@ function(params, db){
 	body += '</body></html>'
 
 	response = new Response(body);
-	
-	
 	return(response.finalize());
 }

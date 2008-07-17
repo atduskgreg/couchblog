@@ -209,13 +209,9 @@ function secretVersionOf(string){
 	return b64_hmac_sha1(SUPERSECRET, string);
 }
 
-function validCookie(cookie){
-	return secretVersionOf(cookie.login) == cookie.secret;
-}
-
-function currentUser(params) {
-	if(params.cookie.session){
-		return sessionFromCookie(params.cookie).login;
+function currentUser(request) {
+	if(request.cookie.session){
+		return sessionFromCookie(request.cookie).login;
 	} else {
 		return false
 	}
@@ -272,13 +268,19 @@ function authenticateSession(session){
 	};
 };
 
-function authenticatedUser(user, params){
-	return secretVersionOf(params.post.password) == user.hashedPassword;
+function authenticatedUser(user, request){
+	return secretVersionOf(request.post.password) == user.hashedPassword;
 }
 
-function postOnly(params){
-	if (params.verb != 'POST') {
+function postOnly(request){
+	if (request.verb != 'POST') {
 		throw({message: 'Method not allowed: POST only.', status : 405})
+	}
+}
+
+function loggedInOnly(request){
+	if (!currentUser(request)) {
+		throw({message: 'Forbidden: Logged in users only.', status : 403})
 	}
 }
 	
@@ -286,7 +288,7 @@ function postOnly(params){
 function Response(body){
 	this.type = 'body';
 	this.body = body;
-	if(params.cookie) this.session = sessionFromCookie(params.cookie);
+	if(request.cookie) this.session = sessionFromCookie(request.cookie);
 	
 	this.expireSession = function(){
 		this.session.expires = "Thu, 01 Jan 1970 00:00:00 GMT";

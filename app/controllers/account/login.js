@@ -1,18 +1,18 @@
-function(params, db) {
+function(request, db) {
   //include-lib
 
 	var response = new Response;
 
-	log(params);
+	log(request);
 
-	postOnly(params);
+	postOnly(request);
 	
-	var user = db.open('user:'+params.post.login);
+	var user = db.open('user:'+request.post.login);
 	
-	if (user && authenticatedUser(user, params)) {
+	if (user && authenticatedUser(user, request)) {
 		response.session = {
-			login : params.post.login, 
-			hashedLogin : secretVersionOf(params.post.login)
+			login : request.post.login, 
+			hashedLogin : secretVersionOf(request.post.login)
 		}
 		
 		response.body = 'Login successful! Click <a href="/pdxblog/_action/posts/index">here</a> if you are not redirected.';
