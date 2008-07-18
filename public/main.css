@@ -28,10 +28,34 @@ label {
 	width: 622px;
 }
 
+#footer {
+	border: 3px solid #0ff;
+	padding:10px;
+	font-size: 80%;
+	color: #fff;
+}
+
+.column {
+	width: 175px;
+	float: left;
+	margin: 10px;
+}
+
+#footer a {color:#0ff;}
+
 #main {
 	background-color: #fff;
 	color: #000;
 	padding: 10px;
+	line-height: 1.6;
+	border: 3px solid #0ff;
+	border-top: none;
+	border-bottom: 20px solid #0ff;
+}
+
+
+#main ul {
+	padding:0;
 }
 
 #main h2 {
@@ -74,15 +98,7 @@ label {
 	margin-top: 20px;
 }
 
-#main {
-	line-height: 1.6;
-	border: 3px solid #0ff;
-	border-top: none;
-}
 
-#main ul {
-	padding:0;
-}
 
 #login input {
 	font-size: 70%;

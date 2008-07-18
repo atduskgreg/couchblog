@@ -72,7 +72,31 @@ function(request, db){
 		body += '</li>'
 	});
      
-	body += '</ul></div></div></body></html>'
+	body += '</ul></div>';
+	
+	//footer:
+	body += '<div id="footer">';
+	body += '<div class="column">'
+	body += '<h4>About</h4>';
+	body += '<p>CouchDB Portland was founded in June 2008.</p>'
+	body += '</div>'
+	
+	body += '<div class="column">'
+	body += '<h4>Projects</h4>';
+	body += '<ul>';
+	body += '<li><a href="http://github.com/atduskgreg/couchblog">Couchblog</a> (the software behind this site)</li>'
+	body += '</ul>';
+	body += '</div>';
+	
+	body += '<div class="column">'
+	body += '<h4>People</h4>';
+	body += '<ul><li>Greg</li> <li>Matt</li> <li>Chris</li></ul>'
+	body += '</div>'
+	
+	body += '<br style="clear:both" />';
+	body += '</div>';
+	
+	body += '</div></body></html>'
 	
 	response = new Response(body)
 	return response.finalize();
