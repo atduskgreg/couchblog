@@ -12,6 +12,8 @@ function(request, db){
 	if(request.cookie.session) authenticateSession(sessionFromCookie(request.cookie));
 	var currentUser = currentUser(request);
 	
+	var post = db.open(request.query["_id"]);
+	
 	var body = '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"><html>';
 	body += '<head><title>CouchDB PDX</title>';
 	body += '<script src="/_utils/script/jquery.js"></script>';
@@ -29,20 +31,23 @@ function(request, db){
 	body += '<div id="main">'
 	body += '<ul>'
 	
-	body += '<li><h2>Write a new post</h2>'
+	body += '<li><h2>Edit this post</h2>'
 	body += '<p class="attribution">'
-	body += '<span class="warning">Warning</span>: Title must be unique per day for slugs. Body is not changed at all, so write your own damn p-tags.'
+	body += '<span class="warning">Warning</span>: Permalinks are forever so slug will not change to match new title. Write your own damn markup.'
 	body += '</p>'
-  body += '<form id="new" action="/pdxblog/_action/posts/create" method="post">';
+  body += '<form id="new" action="/pdxblog/_action/posts/update" method="post">';
+	body += '  <p><label>Slug: </label> '+ post._id +'</p>                                  ';
+
   body += '  <p><label>Title</label>                                  ';
-  body += '  <input name="title"></p>                                 ';
+  body += '  <input name="title" value="'+post.title+'"></p>                                 ';
   body += '  <p><label>Body</label>                                   ';
-  body += '  <textarea name="body"></textarea></p>                    ';
-  body += '  <input name="author" type="hidden" value="'+currentUser+'"></p>';
+  body += '  <textarea name="body">'+ post.body +'</textarea></p>                    ';
   body += '  <p>                                                      ';
   body += '  <label class="submit">&nbsp;</label><input class="submit" type="submit" value="submit" /> ';
   body += '  </p>                                                     ';
-  body += '  <input type="hidden" name="published_at" value="">       ';
+  body += '  <input type="hidden" name="_id" value="'+ post._id +'">       ';
+  body += '  <input type="hidden" name="published_at" value="'+ post.published_at +'">       ';
+
   body += '                                                           ';
   body += '</form>                                                    ';
 	body += '</li></ul></body></html>';

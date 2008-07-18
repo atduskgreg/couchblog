@@ -33,7 +33,7 @@ function(request, db) {
 	
 	body += '<li><h2>Create a new user</h2>'
 	body += '<p class="attribution">'
-	body += 'Warning: Login must be unique. Current users: '
+	body += '<span class="warning">Warning</span>: Login must be unique. Current users: '
 	
 	var users = [];
 	

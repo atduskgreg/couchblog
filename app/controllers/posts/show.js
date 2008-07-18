@@ -40,6 +40,15 @@ function(request, db){
 	body += '<p class="attribution">'
 	body += 'posted by <span class="author">'+post.author+'</span>'
 	body += ' on <span class="permalink"><a href="show?_id='+post._id+'">'+post.published_at.split(' ')[0] + ' at ' +  post.published_at.split(' ')[1]+'</a></span>'
+	
+	if (post.edits){
+		body += ' (edited by'
+		for (editor in post.edits){
+			body += ' <span class="author">'+editor+'</span> on '+post.published_at.split(' ')[0] + ' at '+ post.edits[editor].split(' ')[1]
+		}
+		body += ')'
+	}
+
 	body += '</p>'
 	body += '<div class="post">'
 	body += post.body

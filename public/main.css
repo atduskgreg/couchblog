@@ -136,3 +136,12 @@ label {
 	float:left;
 	width:165px;
 }
+
+.edit {
+	background-color: #0ff;
+	padding: 3px;
+	color: #fff;
+	margin-right: 5px;
+}
+
+.warning { color: #f00;}

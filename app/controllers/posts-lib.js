@@ -283,6 +283,19 @@ function loggedInOnly(request){
 		throw({message: 'Forbidden: Logged in users only.', status : 403})
 	}
 }
+
+function now(){
+	var f = function(n) { return n < 10 ? '0' + n : n }
+
+	d = new Date;
+	return d.getUTCFullYear() + '/' +
+                 			f(d.getUTCMonth() + 1) + '/' +
+                 			f(d.getUTCDate()) + ' ' +
+                 f(d.getUTCHours())     + ':' +
+                 f(d.getUTCMinutes())   + ':' +
+                 f(d.getUTCSeconds()) + " +0000";
+
+}
 	
 // TODO: -alerts on response?
 function Response(body){
