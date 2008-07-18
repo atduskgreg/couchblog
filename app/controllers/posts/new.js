@@ -18,7 +18,7 @@ function(request, db){
 	body += '<script src="/pdxblog/public/main.js"></script>';
 
 	body += '<link rel="stylesheet" type="text/css" charset="utf-8" href="/pdxblog/public/main.css" /></head><body>';
-	body += '<div id="body"><div id="header"><img src="/pdxblog/public/couchdb-pdx-header.png" /><ul id="nav"><li><a href="index">home</a></li><li><a href="http://groups.google.com/group/couchdb-pdx/">mailing list</a></li>';
+	body += '<div id="body"><div id="header"><img src="/pdxblog/public/couchdb-pdx-header.png" /><ul id="nav"><li><a href="/pdxblog/_action/posts/index">home</a></li><li><a href="http://groups.google.com/group/couchdb-pdx/">mailing list</a></li>';
               
 	body += '<li>logged in as: ' + currentUser + '<li>';
 	body += '<li><a href="/pdxblog/_action/posts/new">write post</a></li>';

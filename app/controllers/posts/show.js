@@ -10,7 +10,7 @@ function(request, db){
 	body += '<script src="/pdxblog/public/main.js"></script>';
 
 	body += '<link rel="stylesheet" type="text/css" charset="utf-8" href="/pdxblog/public/main.css" /></head><body>';
-	body += '<div id="body"><div id="header"><img src="/pdxblog/public/couchdb-pdx-header.png" /><ul id="nav"><li><a href="index">home</a></li><li><a href="http://groups.google.com/group/couchdb-pdx/">mailing list</a></li>';
+	body += '<div id="body"><div id="header"><img src="/pdxblog/public/couchdb-pdx-header.png" /><ul id="nav"><li><a href="/pdxblog/_action/posts/index">home</a></li><li><a href="http://groups.google.com/group/couchdb-pdx/">mailing list</a></li>';
 	              
 	if (currentUser){
 	body += '<li>logged in as: ' + currentUser + '<li>';
@@ -36,18 +36,26 @@ function(request, db){
 	
 	var post = db.open(request.query["_id"]);
 	
-	body += '<li><h2>'+post.title+'</h2>'
+	body += '<li><h2>'+ post.title+'</h2>';
 	body += '<p class="attribution">'
+	if (currentUser){
+   	body += '<a class="edit" href="/pdxblog/_action/posts/edit?_id='+post._id+'">edit</a>';
+	};
+		
 	body += 'posted by <span class="author">'+post.author+'</span>'
 	body += ' on <span class="permalink"><a href="show?_id='+post._id+'">'+post.published_at.split(' ')[0] + ' at ' +  post.published_at.split(' ')[1]+'</a></span>'
 	
+	body += '</p>'
 	if (post.edits){
-		body += ' (edited by'
+		body += '<p class="edits">(edited by'
+	
+		var edits = [];
 		for (editor in post.edits){
-			body += ' <span class="author">'+editor+'</span> on '+post.published_at.split(' ')[0] + ' at '+ post.edits[editor].split(' ')[1]
+			edits.push(' <span class="author">'+editor+'</span> on '+post.published_at.split(' ')[0] + ' at '+ post.edits[editor].split(' ')[1])
 		}
-		body += ')'
-	}
+		body += edits.join(', ');
+		body += ')</p>'
+	};
 
 	body += '</p>'
 	body += '<div class="post">'

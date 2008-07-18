@@ -52,7 +52,6 @@ label {
 	font-size: 11px;
 	padding-left: 5px;
 	font-style: italic;
-	margin-bottom: 20px;
 }
 
 .author {
@@ -72,6 +71,7 @@ label {
 .post {
 	width: 95%;
 	margin: 0 auto;
+	margin-top: 20px;
 }
 
 #main {
@@ -137,11 +137,20 @@ label {
 	width:165px;
 }
 
+.edits {
+	font-size: 10px;
+	margin: 0;
+	font-style: italic;
+	color: #aaa;
+	margin-left: 3px;
+}
+
 .edit {
 	background-color: #0ff;
-	padding: 3px;
-	color: #fff;
+	padding: 5px;
+	color: #000;
 	margin-right: 5px;
+	margin-left: -5px;
 }
 
 .warning { color: #f00;}
