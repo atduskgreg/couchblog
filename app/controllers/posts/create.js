@@ -10,37 +10,38 @@ function(request, db){
 		response.redirect = "/pdxblog/_action/posts/index";
 		return response.finalize();
 	}
+	
+	postOnly(request);
+
 
 	if(request.cookie.session) authenticateSession(sessionFromCookie(request.cookie));
 	var currentUser = currentUser(request);
 
-	if (request.verb == "POST"){
-		var doc = request.post;
-		
-		var d = new Date;
-		
-		var f = function(n) { return n < 10 ? '0' + n : n }
-		
-		var now = d.getUTCFullYear() + '/' +
-	                 			f(d.getUTCMonth() + 1) + '/' +
-	                 			f(d.getUTCDate()) + ' ' +
-	                 f(d.getUTCHours())     + ':' +
-	                 f(d.getUTCMinutes())   + ':' +
-	                 f(d.getUTCSeconds()) + " +0000";
+	var doc = request.post;
 	
-		doc.published_at = now;
-		doc._id = d.getUTCFullYear() + '' + f(d.getUTCMonth() + 1) + '' + f(d.getUTCDate()) + '' + '-' + doc.title.replace(/[^\w\s-]+/g, '').replace(/[-\s]+/g, '-').toLowerCase() ;
-		
-		try{
-			db.save(doc);
-		} catch(e){
-			var response = new Response;
-			response.body = 'There is already a post by that name. Click <a href="/pdxblog/_action/posts/index">here</a> if you are not redirected.';
+	var d = new Date;
+	
+	var f = function(n) { return n < 10 ? '0' + n : n }
+	
+	var now = d.getUTCFullYear() + '/' +
+                 			f(d.getUTCMonth() + 1) + '/' +
+                 			f(d.getUTCDate()) + ' ' +
+                 f(d.getUTCHours())     + ':' +
+                 f(d.getUTCMinutes())   + ':' +
+                 f(d.getUTCSeconds()) + " +0000";
 
-			response.redirect = '/pdxblog/_action/posts/new'
-			return response.finalize();
-		}
-	};
+	doc.published_at = now;
+	doc._id = d.getUTCFullYear() + '' + f(d.getUTCMonth() + 1) + '' + f(d.getUTCDate()) + '' + '-' + doc.title.replace(/[^\w\s-]+/g, '').replace(/[-\s]+/g, '-').toLowerCase() ;
+	
+	try{
+		db.save(doc);
+	} catch(e){
+		var response = new Response;
+		response.body = 'There is already a post by that name. Click <a href="/pdxblog/_action/posts/index">here</a> if you are not redirected.';
+
+		response.redirect = '/pdxblog/_action/posts/new'
+		return response.finalize();
+	}
 	
 
 	var response = new Response;

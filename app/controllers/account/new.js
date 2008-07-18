@@ -1,6 +1,6 @@
-function(request, db){
-	//include-lib
-	
+function(request, db) {
+  //include-lib
+
 	try {
 		loggedInOnly(request);
 	} catch(e){
@@ -8,9 +8,11 @@ function(request, db){
 		response.redirect = "/pdxblog/_action/posts/index";
 		return response.finalize();
 	}
-	
+
 	if(request.cookie.session) authenticateSession(sessionFromCookie(request.cookie));
 	var currentUser = currentUser(request);
+	
+
 	
 	var body = '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"><html>';
 	body += '<head><title>CouchDB PDX</title>';
@@ -29,20 +31,30 @@ function(request, db){
 	body += '<div id="main">'
 	body += '<ul>'
 	
-	body += '<li><h2>Write a new post</h2>'
+	body += '<li><h2>Create a new user</h2>'
 	body += '<p class="attribution">'
-	body += 'Warning: Title must be unique per day for slugs. Body is not changed at all, so write your own damn p-tags.'
+	body += 'Warning: Login must be unique. Current users: '
+	
+	var users = [];
+	
+	db.view("users/users-map").rows.forEach(function(row){
+		users.push(row.value);
+	});
+	
+	body += users.join(", ") + "."
+	
 	body += '</p>'
-  body += '<form id="new" action="/pdxblog/_action/posts/create" method="post">';
-  body += '  <p><label>Title</label>                                  ';
-  body += '  <input name="title"></p>                                 ';
-  body += '  <p><label>Body</label>                                   ';
-  body += '  <textarea name="body"></textarea></p>                    ';
-  body += '  <input name="author" type="hidden" value="'+currentUser+'"></p>';
+  body += '<form id="new" action="/pdxblog/_action/account/create" method="post">';
+  body += '  <p><label>Login</label>                               ';
+  body += '  <input name="login"></p>                                 ';
+  body += '  <p><label>Password</label>                                   ';
+  body += '  <input name="password" type="password"></p>                    ';
+  body += '  <p><label>Confirm Password</label>                                   ';
+
+  body += '  <input name="password_confirmation" type="password"></p>                    ';
   body += '  <p>                                                      ';
   body += '  <label class="submit">&nbsp;</label><input class="submit" type="submit" value="submit" /> ';
   body += '  </p>                                                     ';
-  body += '  <input type="hidden" name="published_at" value="">       ';
   body += '                                                           ';
   body += '</form>                                                    ';
 	body += '</li></ul></body></html>';

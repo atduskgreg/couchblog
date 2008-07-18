@@ -15,16 +15,17 @@ function(request, db){
 	body += '<div id="body"><div id="header"><img src="/pdxblog/public/couchdb-pdx-header.png" /><ul id="nav"><li><a href="index">home</a></li><li><a href="http://groups.google.com/group/couchdb-pdx/">mailing list</a></li>';
 	              
 	if (currentUser){
-		body += '<li>logged in as: ' + currentUser + '<li>';
-		body += '<li><a href="new">new</a></li>';
-		body += '<li><a href="/pdxblog/_action/account/logout">logout</a></li></ul>';
+	body += '<li>logged in as: ' + currentUser + '<li>';
+	body += '<li><a href="/pdxblog/_action/posts/new">write post</a></li>';
+	body += '<li><a href="/pdxblog/_action/account/new">add user</a></li>';
+	body += '<li><a href="/pdxblog/_action/account/logout">logout</a></li></ul>';
 	} else {
 		body += '<li><a href="/pdxblog/_action/account/login" id="login-link">login</a></li><li><form id="login" action="/pdxblog/_action/account/login" method="post">                                   ';
   	body += '  <label>Username</label>                                                                   ';
-  	body += '  <input name="login"></input></p>                                                             ';
+  	body += '  <input name="login"></input>                                                            ';
   	body += '                                                                                               ';
   	body += '  <label>Password</label>                                                                   ';
-  	body += '  <input name="password" type="password"></input></p>                                          ';
+  	body += '  <input name="password" type="password"></input>                                          ';
   	body += '                                                                                            ';
   	body += '  <label class="submit">&nbsp;</label><input class="submit" type="submit" value="submit" />    ';
   	body += '                                                                                           ';
