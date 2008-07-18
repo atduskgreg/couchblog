@@ -28,12 +28,6 @@ label {
 	width: 622px;
 }
 
-#footer {
-	border: 3px solid #0ff;
-	padding:10px;
-	font-size: 80%;
-	color: #fff;
-}
 
 .column {
 	width: 175px;
@@ -41,7 +35,29 @@ label {
 	margin: 10px;
 }
 
+#footer {
+	border: 3px solid #0ff;
+	padding:10px;
+	font-size: 60%;
+	color: #666;
+}
+
 #footer a {color:#0ff;}
+
+#footer h4 {
+	color: #fff;
+	font-size: 120%;
+}
+
+#footer li {
+	list-style-type: none;
+}
+
+#footer ul, #footer p {
+	padding: 0;
+	padding-left: 5px;
+}
+
 
 #main {
 	background-color: #fff;
